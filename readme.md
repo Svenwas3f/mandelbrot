@@ -8,4 +8,4 @@ Das Programm bietet diverse Steuerungsoptionen um Ausschnitte aus der Mandelbrot
 Eine Livevorschau findet sich online unter https://svenwas3f.github.io/mandelbrot/
 
 ## Installation
-Laden Sie das Dokument [index.html](https://github.com/Svenwas3f/mandelbrot/blob/master/index.html) herunter und öffnen Sie es in einem beliebigen Browser. Das Dokument kann lokal abgespeichert werden und von jedem beliebigen Pfad geöffnet werden.   
+Laden Sie das Dokument [index.html](https://github.com/Svenwas3f/mandelbrot/blob/master/index.html) herunter und öffnen Sie es in einem beliebigen Browser. Das Dokument kann lokal abgespeichert werden und von jedem beliebigen Pfad geöffnet werden.    
