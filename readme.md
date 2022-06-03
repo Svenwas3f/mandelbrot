@@ -2,7 +2,7 @@
 Das Programm "Mandelbrot" wurde mithilfe der p5js Library geschrieben und ermöglicht eine Visualisierung der Mandelbrotmenge. Weiter Informationen zur Mandelbrotmenge finden Sie in Wikipedia unter https://de.wikipedia.org/wiki/Mandelbrot-Menge.
 
 ## Steuerung
-Das Programm bietet diverse Steuerungsoptionen um Ausschnitte aus der Mandelbrotmenge vergrössert anzusehen. Mit den Zoomtasten, welche rechts unten zu finden sind, kann in die Mandelbrotmenge hinein oder hinausgezoomt werden. Mithilfe des Mausrads wird die aktuelle Mausposition als neuer Mittelpunkt verwendet und an dieser Position hineingezoomt.  Mithilfe der Pfeiltasten (`←`, `↑`, `→`, `↓`) kann das Bild verschoben werden. Möchte man einen spezifischen Ausschnitt der Mandelbrotmenge genauer betrachten, kann man mithilfe der linken Maustaste der gewünschte Bereich ausgewählt werden.
+Das Programm bietet diverse Steuerungsoptionen um Ausschnitte aus der Mandelbrotmenge vergrössert anzusehen. Mit den Zoomtasten, welche rechts unten zu finden sind, kann in die Mandelbrotmenge hinein oder hinausgezoomt werden. Mithilfe des Mausrads wird die aktuelle Mausposition als neuer Mittelpunkt verwendet und an dieser Position hineingezoomt.  Mithilfe der Pfeiltasten (`←`, `↑`, `→`, `↓`) kann das Bild verschoben werden. Möchte man einen spezifischen Ausschnitt der Mandelbrotmenge genauer betrachten, kann mithilfe der linken Maustaste der gewünschte Bereich ausgewählt werden.
 
 ## Livedemo
 Eine Livevorschau findet sich online unter https://svenwas3f.github.io/mandelbrot/
