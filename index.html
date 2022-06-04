@@ -35,12 +35,13 @@
     var imMax = 1; // Koordinatenachse: Imaginärteil Maximum
 
     var zoomBoxSize, zoomOutX, zoomOutY, zoomInX, zoomInY, customZoomXStart, customZoomXEnd, customZoomYStart, customZoomYend; // Zoom Variablen
-    var settingsBoxSize, settingsX, settingsY, settingsBoxRadius; // Einstellungen Variablen
-    var cache = []; // Cache-Variable für Mandelbrotmengen 
+    var settingsBoxSize, settingsBoxX, settingsBoxY, settingsBoxRadius, settingsWindow, settingsWidth, settingsHeight, settingsPadding; // Einstellungen Variablen
+    var cache = []; // Cache-Variable für Mandelbrotmengen
 
     // Setupfunction von p5JS
     function setup() {
       // Zeige canvas
+      // createCanvas(window.innerWidth, window.innerHeight); // Vollbild (Benötigt extreme Rechenleistung)
       createCanvas(600, 400);
 
       // Intialisiere Zoomvariablen
@@ -54,9 +55,12 @@
       customZoomXEnd = 0;
       customZoomYEnd = 0;
       settingsBoxSize = zoomBoxSize;
-      settingsX = width - 30;
-      settingsY = 10;
+      settingsBoxX = width - 30;
+      settingsBoxY = 10;
       settingsBoxRadius = 3;
+      settingsWindow = false;
+      settingsWidth = 150;
+      settingsHeight = 200;
     }
 
     // Drawfunction von p5JS
@@ -209,16 +213,23 @@
         }
       }
 
-
-
       // Einstellungen
+      if(settingsWindow) { // Prüfe ob Einstellungen angezeigt werden sollen
+        fill("black");
+        strokeWeight(0);
+        rect(settingsBoxX - settingsWidth + settingsBoxSize, settingsBoxY, settingsWidth, settingsHeight, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius);
+      }
+
+      // Button Einstellungen
       fill("black");
       strokeWeight(0);
-      rect(settingsX, settingsY, settingsBoxSize, settingsBoxSize, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius);
+      rect(settingsBoxX, settingsBoxY, settingsBoxSize, settingsBoxSize, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius);
       fill("white");
       textSize(settingsBoxSize*2/3);
       textAlign(CENTER, CENTER);
-      text("⚙️", settingsX, settingsY, settingsBoxSize, settingsBoxSize); // Text für zoom out
+      text("⚙️", settingsBoxX, settingsBoxY, settingsBoxSize, settingsBoxSize); // Text für zoom out
+
+
 
       // Zoom Button anzeigen
       fill("black");
@@ -245,6 +256,11 @@
                  mouseY > zoomInY && mouseY < (zoomInY + zoomBoxSize)
                 ) { // Zoom in
           zoom("in"); // Hineinzoomen
+        }else if(mouseX > settingsBoxX && mouseX < (settingsBoxX + settingsBoxSize) && // X-Achsenabschnitte
+                 mouseY > settingsBoxY && mouseY < (settingsBoxY + settingsBoxSize)
+               ) { // Display settings box
+          settingsWindow = !settingsWindow;
+          redraw(); // Neu laden
         } else {
           // Eigene Auswahl treffen
           if(customZoomXStart == 0 || customZoomYStart == 0) {
