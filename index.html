@@ -29,38 +29,65 @@
     // Export als PNG
 
     // Variablen
-    var reMin = -2; // Koordinatenachse: Realteil Minimum
-    var reMax = 1; // Koordinatenachse: Realteil Maximumg
-    var imMin = -1; // Koordinatenachse: Imaginärteil Minimum
-    var imMax = 1; // Koordinatenachse: Imaginärteil Maximum
-
+    var reMin, reMax, imMin, imMax; // Koordinatenachsen
     var zoomBoxSize, zoomOutX, zoomOutY, zoomInX, zoomInY, customZoomXStart, customZoomXEnd, customZoomYStart, customZoomYend; // Zoom Variablen
     var settingsBoxSize, settingsBoxX, settingsBoxY, settingsBoxRadius, settingsWindow, settingsWidth, settingsHeight, settingsPadding; // Einstellungen Variablen
     var cache = []; // Cache-Variable für Mandelbrotmengen
+    var buttons; // Buttonclick
 
     // Setupfunction von p5JS
     function setup() {
       // Zeige canvas
-      // createCanvas(window.innerWidth, window.innerHeight); // Vollbild (Benötigt extreme Rechenleistung)
       createCanvas(600, 400);
 
+      // Initialisiere Koordinatenachsen
+      reMin = -2; // Koordinatenachse: Realteil Minimum
+      reMax = 1; // Koordinatenachse: Realteil Maximumg
+      imMin = -1; // Koordinatenachse: Imaginärteil Minimum
+      imMax = 1; // Koordinatenachse: Imaginärteil Maximum
+
       // Intialisiere Zoomvariablen
-      zoomBoxSize = 20;
-      zoomOutX = width - 55;
-      zoomOutY = height - 30;
-      zoomInX = width - 30;
-      zoomInY = height - 30;
-      customZoomXStart = 0;
-      customZoomYStart = 0;
-      customZoomXEnd = 0;
-      customZoomYEnd = 0;
-      settingsBoxSize = zoomBoxSize;
-      settingsBoxX = width - 30;
-      settingsBoxY = 10;
-      settingsBoxRadius = 3;
-      settingsWindow = false;
-      settingsWidth = 150;
-      settingsHeight = 200;
+      zoomBoxSize = 20; // Grösse der Zoomoptionbox (px)
+      zoomOutX = width - 55; // X-Position für das vergrössern der Grafik (px)
+      zoomOutY = height - 30; // Y-Position für das vergrössern der Grafik (px)
+      zoomInX = width - 30; // X-Position für das verkleinern der Grafik (px)
+      zoomInY = height - 30; // Y-Position für das verkleinern der Grafik (px)
+      customZoomXStart = 0; // X-Startposition für die Zoomauswahl in der Grafik
+      customZoomYStart = 0; // Y-Startposition für die Zoomauswahl in der Grafik
+      customZoomXEnd = 0; // X-Endposition für die Zoomauswahl in der Grafik
+      customZoomYEnd = 0; // Y-Endposition für die Zoomauswahl in der Grafik
+
+      // Initialisiere Einstellungsvariablen
+      settingsBoxSize = zoomBoxSize; // Grösse der Einstellungsbox
+      settingsBoxX = width - 30; // X-Position für die Einstellungsbox
+      settingsBoxY = 10; // Y-Position für die Einstellungsbox
+      settingsBoxRadius = 3; // Abrundung an den Ecken (px)
+      settingsWindow = false; // Sichtbarkeit der Einstellungen
+      settingsWidth = 150; // Breite des Einstellungsfenster
+      settingsHeight = 200; // Höhe des Einstellungsfenster
+      settingsPadding = 10; // Innenabstand im Einstellungsfenster
+
+      // Buttons
+      buttons = { // Gibt alle Buttons an und kann während der drawfunction auch verändert werden
+        "zoomOut" : { // Optionname
+          "x" : zoomOutX, // X-Koordinate des Button
+          "y" : zoomOutY, // Y-Koordinate des Button
+          "width" : zoomBoxSize, // Breite des Button
+          "height" : zoomBoxSize, // Höhe des Button
+        },
+        "zoomIn" : { // Optionname
+          "x" : zoomInX, // X-Koordinate des Button
+          "y" : zoomInY, // Y-Koordinate des Button
+          "width" : zoomBoxSize, // Breite des Button
+          "height" : zoomBoxSize, // Höhe des Button
+        },
+        "settingsBox" : { // Optionname
+          "x" : settingsBoxX, // X-Koordinate des Button
+          "y" : settingsBoxY, // Y-Koordinate des Button
+          "width" : settingsBoxSize, // Breite des Button
+          "height" : settingsBoxSize, // Höhe des Button
+        }
+      };
     }
 
     // Drawfunction von p5JS
@@ -215,9 +242,23 @@
 
       // Einstellungen
       if(settingsWindow) { // Prüfe ob Einstellungen angezeigt werden sollen
+        //  Bearbeitungsbereich
+        settingsX = settingsBoxX - settingsWidth + settingsBoxSize
+        settingsY = settingsBoxY;
+
+        // Hintergrund
         fill("black");
         strokeWeight(0);
-        rect(settingsBoxX - settingsWidth + settingsBoxSize, settingsBoxY, settingsWidth, settingsHeight, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius);
+        rect(settingsX, settingsBoxY, settingsWidth, settingsHeight, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius);
+
+        // Farben einstellen
+
+        // Gaussches Koordinatensystem
+
+        // Grenze einstellen
+
+        // Schwellenwert einstellen
+
       }
 
       // Button Einstellungen
@@ -228,7 +269,6 @@
       textSize(settingsBoxSize*2/3);
       textAlign(CENTER, CENTER);
       text("⚙️", settingsBoxX, settingsBoxY, settingsBoxSize, settingsBoxSize); // Text für zoom out
-
 
 
       // Zoom Button anzeigen
@@ -246,41 +286,25 @@
       textAlign(CENTER, CENTER);
       text("+", zoomInX, zoomInY, zoomBoxSize, zoomBoxSize); // Text für zoom in
 
-      if (mouseIsPressed == true) {
-        // Zoom prüfen
-        if(mouseX > zoomOutX && mouseX < (zoomOutX + zoomBoxSize) && // X-Achse
-           mouseY > zoomOutY && mouseY < (zoomOutY + zoomBoxSize) // Y-Achse
-          ) { // Zoom out
-          zoom("out"); // Herauszoomen
-        }else if(mouseX > zoomInX && mouseX < (zoomInX + zoomBoxSize) && // X-Achse
-                 mouseY > zoomInY && mouseY < (zoomInY + zoomBoxSize)
-                ) { // Zoom in
-          zoom("in"); // Hineinzoomen
-        }else if(mouseX > settingsBoxX && mouseX < (settingsBoxX + settingsBoxSize) && // X-Achsenabschnitte
-                 mouseY > settingsBoxY && mouseY < (settingsBoxY + settingsBoxSize)
-               ) { // Display settings box
-          settingsWindow = !settingsWindow;
-          redraw(); // Neu laden
-        } else {
-          // Eigene Auswahl treffen
-          if(customZoomXStart == 0 || customZoomYStart == 0) {
-            // Initialisierungsschritt
-            customZoomXStart = mouseX;
-            customZoomYStart = mouseY;
-          }
-
-          // Definiere Ende fortlaufend
-          customZoomXEnd = mouseX;
-          customZoomYEnd = mouseY;
-
-          // Zeige Vorschau an
-          stroke("black"); // Randfarbe
-          strokeWeight(3); // Rand genügend dick
-          fill(255,255,255,0); // transparent
-          rect(customZoomXStart, customZoomYStart, mouseX - customZoomXStart, mouseY - customZoomYStart); // Rechteck für Auswahl
+      if (mouseIsPressed == true && buttonPressed() === false) {
+        // Eigene Auswahl treffen
+        if(customZoomXStart == 0 || customZoomYStart == 0) {
+          // Initialisierungsschritt
+          customZoomXStart = mouseX;
+          customZoomYStart = mouseY;
         }
+
+        // Definiere Ende fortlaufend
+        customZoomXEnd = mouseX;
+        customZoomYEnd = mouseY;
+
+        // Zeige Vorschau an
+        stroke("black"); // Randfarbe
+        strokeWeight(3); // Rand genügend dick
+        fill(255,255,255,0); // transparent
+        rect(customZoomXStart, customZoomYStart, mouseX - customZoomXStart, mouseY - customZoomYStart); // Rechteck für Auswahl
       }else {
-        // Prüfe ob Zoom benötigt
+        // Auswahl
         if(customZoomXStart != 0 && customZoomYStart != 0 && customZoomXEnd != 0 && customZoomYEnd != 0 &&
           customZoomXStart != customZoomXEnd && customZoomYStart != customZoomYEnd) {
           // Die Länge muss zwingend vor dem Anpassen ausgerechnet werden, da die Koordinatenvariablen anschliessend angepasst werden
@@ -309,7 +333,6 @@
         let imLength = Math.abs(imMax - imMin); // Länge vom imaginärteil berechnen
         let reCenter = reMin + mouseX/width*reLength; // Neuer Mittelpunkt auf der Canvas vom realteil berechnen
         let imCenter = imMax - mouseY/height*imLength; // Neuer Mittelpunkt auf der Canvas von imaginärteil berechnen
-        console.log(reCenter, reLength, reCenter - reLength/2);
 
         reMin = (reCenter - reLength/2)*0.9; // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
         reMax = (reCenter + reLength/2)*0.9; // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
@@ -326,6 +349,21 @@
         reMax = (reCenter + reLength/2)*1.1; // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
         imMin = (imCenter - imLength/2)*1.1; // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
         imMax = (imCenter + imLength/2)*1.1; // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
+      }
+
+      redraw(); // Grafik neu laden
+    }
+
+    // mousepressedfunction von p5js
+    function mousePressed() {
+      // Zoom prüfen
+      if(buttonPressed("zoomOut")) {
+        zoom("out"); // Herauszoomen
+      } else if(buttonPressed("zoomIn")) {
+        zoom("in"); // Hineinzoomen
+      } else if(buttonPressed("settingsBox")) {
+        settingsWindow = !settingsWindow;
+        redraw(); // Neu laden
       }
     }
 
@@ -358,6 +396,24 @@
           imMax -= imLength*0.1;
         break;
       }
+    }
+
+    // Funktion prüft ob ein (bestimmter) Button angeklickt wurde
+    // button_to_check muss übereinstimmen mit dem Buttonname in buttons
+    // oder gleich null sein um alle Buttons zu prüfen
+    function buttonPressed(button_to_check = null) {
+      for(let name in buttons) { // Alle Buttons durchgehen
+        if(button_to_check == null || button_to_check == name) {
+          if(mouseX > buttons[name]["x"] && mouseX < (buttons[name]["x"] + buttons[name]["width"]) && // X-Achse
+             mouseY > buttons[name]["y"] && mouseY < (buttons[name]["y"] + buttons[name]["height"]) // Y-Achse
+          ) {
+              return true; // Wahr zurückgeben
+            }
+        }
+      }
+
+      // Kein Button angeklickt
+      return false;
     }
 
     // Prüfen, ob Zahl in Mandelbrotmenge ist
@@ -419,7 +475,7 @@
       if(direction == "in") {
         var mult = 0.9; // Multiplikator um hinein zu zoomen
       }else {
-        var mult = 1.9; // Multiplikator für hinaus zu zoomen
+        var mult = 1.1; // Multiplikator für hinaus zu zoomen
       }
 
       // Ersetze die Werte der aktuellen Koordinatenachsen
@@ -427,6 +483,8 @@
       reMax *= mult; // Realteil Maximum
       imMin *= mult; // Imaginärteil Minimum
       imMax *= mult; // Imaginärteil Maximum
+
+      redraw(); // Grafik neu laden
     }
     </script>
   </body>
