@@ -31,7 +31,7 @@
     // Variablen
     var reMin, reMax, imMin, imMax; // Koordinatenachsen
     var zoomBoxSize, zoomOutX, zoomOutY, zoomInX, zoomInY, customZoomXStart, customZoomXEnd, customZoomYStart, customZoomYend; // Zoom Variablen
-    var settingsBoxSize, settingsBoxX, settingsBoxY, settingsBoxRadius, settingsWindow, settingsWidth, settingsHeight, settingsPadding, settingsOptions, settingsOptionsHeight, settingsOptionsPadding, settingsColor1, settingsColor2; // Einstellungen Variablen
+    var settingsBoxSize, settingsBoxX, settingsBoxY, settingsBoxRadius, settingsWindow, settingsWidth, settingsHeight, settingsPadding, settingsOptions, settingsOptionsHeight, settingsOptionsPadding, settingsColor1, settingsColor2, settingsColorMandelbrotmenge; // Einstellungen Variablen
     var cache = []; // Cache-Variable für Mandelbrotmengen
     var buttons; // Buttonclick
 
@@ -62,7 +62,7 @@
       settingsBoxX = width - 30; // X-Position für die Einstellungsbox
       settingsBoxY = 10; // Y-Position für die Einstellungsbox
       settingsBoxRadius = 3; // Abrundung an den Ecken (px)
-      settingsOptions = 2; // Anzahl Optionen
+      settingsOptions = 3; // Anzahl Optionen
       settingsOptionsHeight = 16; // Höhe einer Option in Pixel
       settingsOptionsPadding = 3; // Innenabstand der Option (Ist in settingsOptionsHeight bereits inkludiert)
       settingsPadding = 10; // Innenabstand im Einstellungsfenster
@@ -99,6 +99,7 @@
       }
       settingsColor1 = createColorPicker(createColor()).hide(); // Input für den Farbverlauf (Versteckt hinzufügen)
       settingsColor2 = createColorPicker(createColor()).hide(); // Input für den Farbverlauf (Versteckt hinzufügen)
+      settingsColorMandelbrotmenge = createColorPicker(createColor()).hide(); // Farbinput für die Mandelbrotmenge (Versteckt hinzufügen)
     }
 
     // Drawfunction von p5JS
@@ -141,8 +142,8 @@
 
       // Mandelbrotmenge anzeigen
       for(let i = 0; i < cache.mandelbrotmenge.length; i++) {
-        stroke('black'); // Punkte einfärben
-        strokeWeight(1); // Grösse der Punkte definieren
+        stroke(settingsColorMandelbrotmenge.elt.value); // Punkte einfärben
+        strokeWeight(2); // Grösse der Punkte definieren
         point(cache.mandelbrotmenge[i][0], cache.mandelbrotmenge[i][1]); // Punkt anzeigen
       }
 
@@ -291,6 +292,12 @@
         let colorPickerSize = 14;
         let colorPickerStyle = "width: " + colorPickerSize + "px; height: " + colorPickerSize + "px; border: none; outline: none; display: block;";
 
+        // Mandelbrotmenge
+        settingsColorMandelbrotmenge.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerSize)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
+        settingsColorMandelbrotmenge.style(colorPickerStyle); // CSS Style hinzufügen
+        text("Mandelbrotmenge", optionsX + colorPickerSize + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
+        optionCounter++; // Counter erhöhen
+
         // Farbe 1
         settingsColor1.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerSize)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
         settingsColor1.style(colorPickerStyle); // CSS Style hinzufügen
@@ -312,10 +319,12 @@
         // Inputs anzeigen
         settingsColor1.show();
         settingsColor2.show();
+        settingsColorMandelbrotmenge.show();
       } else {
         // Alle inputs verstecken
         settingsColor1.hide();
         settingsColor2.hide();
+        settingsColorMandelbrotmenge.hide();
       }
 
       // Button Einstellungen
