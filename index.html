@@ -31,7 +31,7 @@
     // Variablen
     var reMin, reMax, imMin, imMax; // Koordinatenachsen
     var zoomBoxSize, zoomOutX, zoomOutY, zoomInX, zoomInY, customZoomXStart, customZoomXEnd, customZoomYStart, customZoomYend; // Zoom Variablen
-    var settingsBoxSize, settingsBoxX, settingsBoxY, settingsBoxRadius, settingsWindow, settingsWidth, settingsHeight, settingsPadding; // Einstellungen Variablen
+    var settingsBoxSize, settingsBoxX, settingsBoxY, settingsBoxRadius, settingsWindow, settingsWidth, settingsHeight, settingsPadding, settingsOptions, settingsOptionsHeight, settingsOptionsPadding, settingsColor1, settingsColor2; // Einstellungen Variablen
     var cache = []; // Cache-Variable für Mandelbrotmengen
     var buttons; // Buttonclick
 
@@ -62,32 +62,41 @@
       settingsBoxX = width - 30; // X-Position für die Einstellungsbox
       settingsBoxY = 10; // Y-Position für die Einstellungsbox
       settingsBoxRadius = 3; // Abrundung an den Ecken (px)
+      settingsOptions = 2; // Anzahl Optionen
+      settingsOptionsHeight = 16; // Höhe einer Option in Pixel
+      settingsOptionsPadding = 3; // Innenabstand der Option (Ist in settingsOptionsHeight bereits inkludiert)
+      settingsPadding = 10; // Innenabstand im Einstellungsfenster
       settingsWindow = false; // Sichtbarkeit der Einstellungen
       settingsWidth = 150; // Breite des Einstellungsfenster
-      settingsHeight = 200; // Höhe des Einstellungsfenster
-      settingsPadding = 10; // Innenabstand im Einstellungsfenster
+      settingsHeight = 2*settingsPadding + (settingsOptions + 1)*settingsOptionsHeight; // Höhe des Einstellungsfenster
+
+
 
       // Buttons
       buttons = { // Gibt alle Buttons an und kann während der drawfunction auch verändert werden
-        "zoomOut" : { // Optionname
+        "zoomOut" : { // Buttonname
           "x" : zoomOutX, // X-Koordinate des Button
           "y" : zoomOutY, // Y-Koordinate des Button
           "width" : zoomBoxSize, // Breite des Button
           "height" : zoomBoxSize, // Höhe des Button
         },
-        "zoomIn" : { // Optionname
+        "zoomIn" : { // Buttonname
           "x" : zoomInX, // X-Koordinate des Button
           "y" : zoomInY, // Y-Koordinate des Button
           "width" : zoomBoxSize, // Breite des Button
           "height" : zoomBoxSize, // Höhe des Button
         },
-        "settingsBox" : { // Optionname
+        "settingsBox" : { // Buttonname
           "x" : settingsBoxX, // X-Koordinate des Button
           "y" : settingsBoxY, // Y-Koordinate des Button
           "width" : settingsBoxSize, // Breite des Button
           "height" : settingsBoxSize, // Höhe des Button
         }
       };
+
+      // Settings inputs
+      settingsColor1 = createColorPicker("#6045ef").hide(); // Input für den Farbverlauf (Versteckt hinzufügen)
+      settingsColor2 = createColorPicker("#05ed6a").hide(); // Input für den Farbverlauf (Versteckt hinzufügen)
     }
 
     // Drawfunction von p5JS
@@ -242,16 +251,41 @@
 
       // Einstellungen
       if(settingsWindow) { // Prüfe ob Einstellungen angezeigt werden sollen
-        //  Bearbeitungsbereich
-        settingsX = settingsBoxX - settingsWidth + settingsBoxSize
-        settingsY = settingsBoxY;
+        // lokale Variablen
+        let windowOptionsX = settingsBoxX - settingsWidth + settingsBoxSize + window.innerWidth/2 - width/2 + settingsPadding;
+        let windowOptionsY = settingsBoxY + window.innerHeight/2 - height/2 + settingsPadding;
+        let optionsX = settingsBoxX - settingsWidth + settingsBoxSize + settingsPadding;
+        let optionsY = settingsBoxY + settingsPadding;
+        let optionCounter = 1;
 
         // Hintergrund
         fill("black");
         strokeWeight(0);
-        rect(settingsX, settingsBoxY, settingsWidth, settingsHeight, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius);
+        rect(optionsX - settingsPadding, settingsBoxY, settingsWidth, settingsHeight, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius);
+
+        // Infotext
+        textAlign(LEFT, TOP);
+        textSize(10);
+        textStyle("bold");
+        fill("white");
+        text("Einstellungen", optionsX, optionsY);
+        textStyle("normal");
 
         // Farben einstellen
+        let colorPickerSize = 14;
+        let colorPickerStyle = "width: " + colorPickerSize + "px; height: " + colorPickerSize + "px; border: none; outline: none; display: block;";
+
+        // Farbe 1
+        settingsColor1.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerSize)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
+        settingsColor1.style(colorPickerStyle); // CSS Style hinzufügen
+        text("Farbe 1", optionsX + colorPickerSize + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
+        optionCounter++; // Counter erhöhen
+
+        // Farbe 2
+        settingsColor2.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerSize)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
+        settingsColor2.style(colorPickerStyle); // CSS Style hinzufügen
+        text("Farbe 2", optionsX + colorPickerSize + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
+        optionCounter++; // Counter erhöhen
 
         // Gaussches Koordinatensystem
 
@@ -259,6 +293,13 @@
 
         // Schwellenwert einstellen
 
+        // Inputs anzeigen
+        settingsColor1.show();
+        settingsColor2.show();
+      } else {
+        // Alle inputs verstecken
+        settingsColor1.hide();
+        settingsColor2.hide();
       }
 
       // Button Einstellungen
