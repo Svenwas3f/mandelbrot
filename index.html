@@ -32,6 +32,7 @@
     var zoomBoxSize, zoomOutX, zoomOutY, zoomInX, zoomInY, customZoomXStart, customZoomXEnd, customZoomYStart, customZoomYend; // Zoom Variablen
     var settingsBoxSize, settingsBoxX, settingsBoxY, settingsBoxRadius, settingsWindow, settingsWidth, settingsHeight, settingsPadding, settingsOptions, settingsOptionsHeight, settingsOptionsPadding; // Einstellungen Variablen
     var color1, color2, colorMandelbrotmenge; // Farbvariablen
+    var grenzwert, schwellenwert; // Mandelbrotfolgevariablen
     var cache = []; // Cache-Variable für Mandelbrotmengen
     var buttons; // Button
 
@@ -62,7 +63,7 @@
       settingsBoxX = width - 30; // X-Position für die Einstellungsbox
       settingsBoxY = 10; // Y-Position für die Einstellungsbox
       settingsBoxRadius = 3; // Abrundung an den Ecken (px)
-      settingsOptions = 3; // Anzahl Optionen
+      settingsOptions = 5; // Anzahl Optionen
       settingsOptionsHeight = 16; // Höhe einer Option in Pixel
       settingsOptionsPadding = 3; // Innenabstand der Option (Ist in settingsOptionsHeight bereits inkludiert)
       settingsPadding = 10; // Innenabstand im Einstellungsfenster
@@ -74,6 +75,10 @@
       color1 = createColorPicker(randomColor()).hide(); // Input für den Farbverlauf (Versteckt hinzufügen)
       color2 = createColorPicker(randomColor()).hide(); // Input für den Farbverlauf (Versteckt hinzufügen)
       colorMandelbrotmenge = createColorPicker(randomColor()).hide(); // Farbinput für die Mandelbrotmenge (Versteckt hinzufügen)
+
+      // Initialisiere Mandelbrotfolgevariablen
+      grenzwert = createInput(2, 'text').hide(); // Betrag, welcher nicht überschritten werden darf um zur Mandelbrotmenge zu gehören
+      schwellenwert = createInput(100, 'text').hide(); // Anzahl Versuche bis ein Punkt zur Mandelbrotmenge gehört
 
       // Buttons
       buttons = { // Gibt alle Buttons an und kann während der drawfunction auch verändert werden
@@ -103,6 +108,8 @@
       // Hintergrundfarbe setzen
       background("white");
 
+      console.log(schwellenwert.value());
+
       // Umrechnung von Pixel in das kartesische Koordinatensystem
       let lengthPerPx = Math.abs(reMax - reMin) / width;
       let heightPerPx = Math.abs(imMax - imMin) / height;
@@ -111,12 +118,17 @@
       if(cache.reMin != reMin ||
         cache.reMax != reMax ||
         cache.imMin != imMin ||
-        cache.imMax != imMax) {
+        cache.imMax != imMax ||
+        cache.grenzwert != grenzwert.value() ||
+        cache.schwellenwert != schwellenwert.value()
+      ) {
         // Cache löschen und neu befüllen
         cache.reMin = reMin;
         cache.reMax = reMax;
         cache.imMin = imMin;
         cache.imMax = imMax;
+        cache.grenzwert = grenzwert.value();
+        cache.schwellenwert = schwellenwert.value();
         cache.mandelbrotmenge = [];
         cache.nichtmandelbrotmenge = [];
 
@@ -276,43 +288,74 @@
         text("Einstellungen", optionsX, optionsY);
         textStyle("normal");
 
-        // Farben einstellen
-        let colorPickerSize = 14;
-        let colorPickerStyle = "width: " + colorPickerSize + "px; height: " + colorPickerSize + "px; border: none; outline: none; display: block;";
+        // Lokale Variablen
+        let colorPickerHeight = 14;
+        let colorPickerWidth = colorPickerHeight*1.5;
+        let colorPickerStyle =  "width: " + colorPickerWidth + "px;" + // Custom CSS
+                                " height: " + colorPickerHeight + "px;" +
+                                " border: none;" +
+                                " outline: none;" +
+                                " display: block;";
+        let inputHeight = 14;
+        let inputWidth = inputHeight*1.5;
+        let inputFontSize = 10;
+        let inputStyle =  "width: " + inputWidth + "px;" + // Custom CSS
+                          "height: " + inputHeight + "px;" +
+                          "border: 1px solid #4d4d4d;" +
+                          "outline: none;" +
+                          "display: block;" +
+                          "background: transparent;" +
+                          "color: white;" +
+                          "text-align: right;" +
+                          "font-size: " + inputFontSize + "px;" +
+                          "padding: " + (inputHeight-inputFontSize)/2 + "px;" +
+                          "box-sizing: border-box;";
 
         // Mandelbrotmenge
-        colorMandelbrotmenge.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerSize)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
+        colorMandelbrotmenge.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerHeight)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
         colorMandelbrotmenge.style(colorPickerStyle); // CSS Style hinzufügen
-        text("Mandelbrotmenge", optionsX + colorPickerSize + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
+        text("Mandelbrotmenge", optionsX + colorPickerWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
         optionCounter++; // Counter erhöhen
 
         // Farbe 1
-        color1.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerSize)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
+        color1.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerHeight)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
         color1.style(colorPickerStyle); // CSS Style hinzufügen
-        text("Farbe 1", optionsX + colorPickerSize + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
+        text("Farbe 1", optionsX + colorPickerWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
         optionCounter++; // Counter erhöhen
 
         // Farbe 2
-        color2.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerSize)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
+        color2.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerHeight)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
         color2.style(colorPickerStyle); // CSS Style hinzufügen
-        text("Farbe 2", optionsX + colorPickerSize + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
+        text("Farbe 2", optionsX + colorPickerWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
         optionCounter++; // Counter erhöhen
 
         // Gaussches Koordinatensystem
 
         // Grenze einstellen
+        grenzwert.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - inputHeight)/2 + optionCounter*settingsOptionsHeight); // Input positionieren
+        grenzwert.style(inputStyle);
+        text("Grenzwert", optionsX + inputWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
+        optionCounter++; // Counter erhöhen
 
         // Schwellenwert einstellen
+        schwellenwert.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - inputHeight)/2 + optionCounter*settingsOptionsHeight); // Input positionieren
+        schwellenwert.style(inputStyle);
+        text("Schwellenwert", optionsX + inputWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
+        optionCounter++; // Counter erhöhen
 
         // Inputs anzeigen
         color1.show();
         color2.show();
         colorMandelbrotmenge.show();
+        grenzwert.show();
+        schwellenwert.show();
       } else {
         // Alle inputs verstecken
         color1.hide();
         color2.hide();
         colorMandelbrotmenge.hide();
+        grenzwert.hide();
+        schwellenwert.hide();
       }
 
       // Button Einstellungen
@@ -477,7 +520,7 @@
       let z = []; // Werteliste der Mandelbrotfolge
       z[1] = c; // Startwert hinzufügen
 
-      for (var i = 0; i < 100; i++) { // Wie Schwellenwert berechnen?
+      for (var i = 0; i < (schwellenwert.value() ?? 100); i++) {
         // Berechne jedes Folgeglied bis Folgeglied 100 erreucht oder der Betrag der komplexen Zahl
         // kleiner ist als 2.
         // var quadrat = squareComplexNumber(z[i-1]);
@@ -485,7 +528,7 @@
         z[i + 2] = addComplexNumber(squareComplexNumber(z[i + 1]), c);
 
         // Prüfe ob die Zahl zur Mandelbrotmenge gehört
-        if (absoluteValue(z[i + 2]) > 2) {
+        if (absoluteValue(z[i + 2]) > (grenzwert.value() ?? 2)) {
           // Zahl gehört nicht zur Mandelbrotmenge.
           return i; // Anzahl Glieder zurückgeben.
         }
