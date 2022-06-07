@@ -21,18 +21,13 @@
   </head>
   <body>
     <script>
-    // Weitere Features
-    // Grenze vom Benutzer einstellen lassen (Aktuell 2)
-    // Schwellenwert vom Benutzer einstellen lassen (Aktuell 100)
-    // Intervalle der gauss'schen Zahlenebene anpassen
-    // Export als PNG
-
     // Variablen
-    var reMin, reMax, imMin, imMax; // Koordinatenachsen
+    var reMin, reMax, imMin, imMax, reMinI, reMaxI, imMinI, imMaxI; // Koordinatenachsen
     var zoomBoxSize, zoomOutX, zoomOutY, zoomInX, zoomInY, customZoomXStart, customZoomXEnd, customZoomYStart, customZoomYend; // Zoom Variablen
     var settingsBoxSize, settingsBoxX, settingsBoxY, settingsBoxRadius, settingsWindow, settingsWidth, settingsHeight, settingsPadding, settingsOptions, settingsOptionsHeight, settingsOptionsPadding; // Einstellungen Variablen
     var color1, color2, colorMandelbrotmenge; // Farbvariablen
     var grenzwert, schwellenwert; // Mandelbrotfolgevariablen
+    var saveBoxX, saveBoxY, saveBoxSize, saveBoxRadius; // Speicherbox
     var cache = []; // Cache-Variable für Mandelbrotmengen
     var buttons; // Button
 
@@ -46,6 +41,10 @@
       reMax = 1; // Koordinatenachse: Realteil Maximumg
       imMin = -1; // Koordinatenachse: Imaginärteil Minimum
       imMax = 1; // Koordinatenachse: Imaginärteil Maximum
+      reMinI = createInput(reMin, "text").hide(); // Input für die Koordinatenachse Realteil Minimum
+      reMaxI = createInput(reMax, "text").hide(); // Input für die Koordinatenachse Realteil Maximum
+      imMinI = createInput(imMin, "text").hide(); // Input für die Koordinatenachse Imaginärteil Minimum
+      imMaxI = createInput(imMax, "text").hide(); // Input für die Koordinatenachse Imaginärteil Maximum
 
       // Intialisiere Zoomvariablen
       zoomBoxSize = 20; // Grösse der Zoomoptionbox (px)
@@ -63,7 +62,7 @@
       settingsBoxX = width - 30; // X-Position für die Einstellungsbox
       settingsBoxY = 10; // Y-Position für die Einstellungsbox
       settingsBoxRadius = 3; // Abrundung an den Ecken (px)
-      settingsOptions = 5; // Anzahl Optionen
+      settingsOptions = 9; // Anzahl Optionen
       settingsOptionsHeight = 16; // Höhe einer Option in Pixel
       settingsOptionsPadding = 3; // Innenabstand der Option (Ist in settingsOptionsHeight bereits inkludiert)
       settingsPadding = 10; // Innenabstand im Einstellungsfenster
@@ -79,6 +78,12 @@
       // Initialisiere Mandelbrotfolgevariablen
       grenzwert = createInput(2, 'text').hide(); // Betrag, welcher nicht überschritten werden darf um zur Mandelbrotmenge zu gehören
       schwellenwert = createInput(100, 'text').hide(); // Anzahl Versuche bis ein Punkt zur Mandelbrotmenge gehört
+
+      //Initialisiere Spericherbox
+      saveBoxX = 10; // X-Position für die Speicherbox
+      saveBoxY = 10; // Y-Position für die Speicherbox
+      saveBoxSize = zoomBoxSize; // Grösse der Speicherbox
+      saveBoxRadius = settingsBoxRadius; // Abrundung an den Ecken (px)
 
       // Buttons
       buttons = { // Gibt alle Buttons an und kann während der drawfunction auch verändert werden
@@ -99,6 +104,12 @@
           "y" : settingsBoxY, // Y-Koordinate des Button
           "width" : settingsBoxSize, // Breite des Button
           "height" : settingsBoxSize, // Höhe des Button
+        },
+        "saveBox" : { // Buttonname
+          "x" : saveBoxX, // X-Koordinate des Button
+          "y" : saveBoxY, // Y-Koordinate des Button
+          "width" : saveBoxSize, // Breite des Button
+          "height" : saveBoxSize, // Höhe des Button
         }
       };
     }
@@ -108,7 +119,13 @@
       // Hintergrundfarbe setzen
       background("white");
 
-      console.log(schwellenwert.value());
+      // Variablen überarbeiten
+      // Doppelte Variablen nötig, da ansonsten überall parseFloat verwendet werden musste
+      // Besipiel: parseFloat(reMinI.value()). Dies ist viel zu lange
+      reMin = parseFloat(reMinI.value() ?? -2); // Inputvalue verwenden
+      reMax = parseFloat(reMaxI.value() ?? 1); // Inputvalue verwenden
+      imMin = parseFloat(imMinI.value() ?? -1); // Inputvalue verwenden
+      imMax = parseFloat(imMaxI.value() ?? 1); // Inputvalue verwenden
 
       // Umrechnung von Pixel in das kartesische Koordinatensystem
       let lengthPerPx = Math.abs(reMax - reMin) / width;
@@ -286,102 +303,122 @@
         textStyle("bold");
         fill("white");
         text("Einstellungen", optionsX, optionsY);
-        textStyle("normal");
 
-        // Lokale Variablen
-        let colorPickerHeight = 14;
-        let colorPickerWidth = colorPickerHeight*1.5;
-        let colorPickerStyle =  "width: " + colorPickerWidth + "px;" + // Custom CSS
-                                " height: " + colorPickerHeight + "px;" +
-                                " border: none;" +
-                                " outline: none;" +
-                                " display: block;";
-        let inputHeight = 14;
-        let inputWidth = inputHeight*1.5;
-        let inputFontSize = 10;
-        let inputStyle =  "width: " + inputWidth + "px;" + // Custom CSS
-                          "height: " + inputHeight + "px;" +
-                          "border: 1px solid #4d4d4d;" +
-                          "outline: none;" +
-                          "display: block;" +
-                          "background: transparent;" +
-                          "color: white;" +
-                          "text-align: right;" +
-                          "font-size: " + inputFontSize + "px;" +
-                          "padding: " + (inputHeight-inputFontSize)/2 + "px;" +
-                          "box-sizing: border-box;";
+        // Fügt eine Option zu den Einstellungen hinzu
+        function addOption(option, type, description) {
+          // Variablen vordefinieren
+          let colorPickerHeight = 14;
+          let colorPickerWidth = colorPickerHeight*1.5;
+          let colorPickerStyle =  "width: " + colorPickerWidth + "px;" + // Custom CSS
+                                  " height: " + colorPickerHeight + "px;" +
+                                  " border: none;" +
+                                  " outline: none;" +
+                                  " display: block;";
+          let inputHeight = 14;
+          let inputWidth = inputHeight*1.5;
+          let inputFontSize = 10;
+          let inputStyle =  "width: " + inputWidth + "px;" + // Custom CSS
+                            "height: " + inputHeight + "px;" +
+                            "border: 1px solid #4d4d4d;" +
+                            "outline: none;" +
+                            "display: block;" +
+                            "background: transparent;" +
+                            "color: white;" +
+                            "text-align: right;" +
+                            "font-size: " + inputFontSize + "px;" +
+                            "padding: " + (inputHeight-inputFontSize)/2 + "px;" +
+                            "box-sizing: border-box;";
 
-        // Mandelbrotmenge
-        colorMandelbrotmenge.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerHeight)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
-        colorMandelbrotmenge.style(colorPickerStyle); // CSS Style hinzufügen
-        text("Mandelbrotmenge", optionsX + colorPickerWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
-        optionCounter++; // Counter erhöhen
+          // Textoptionen
+          textAlign(LEFT, TOP);
+          textStyle("normal");
+          textSize(10);
+          fill("white");
 
-        // Farbe 1
-        color1.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerHeight)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
-        color1.style(colorPickerStyle); // CSS Style hinzufügen
-        text("Farbe 1", optionsX + colorPickerWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
-        optionCounter++; // Counter erhöhen
+          switch(type) {
+            case "input":
+              // Input positionieren
+              option.position(
+                windowOptionsX, // X-Position
+                windowOptionsY + (settingsOptionsHeight - inputHeight)/2 + optionCounter*settingsOptionsHeight // Y-Position
+              );
 
-        // Farbe 2
-        color2.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - colorPickerHeight)/2 + optionCounter*settingsOptionsHeight); // Color Picker positionieren
-        color2.style(colorPickerStyle); // CSS Style hinzufügen
-        text("Farbe 2", optionsX + colorPickerWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
-        optionCounter++; // Counter erhöhen
+              // Erweiterte Styleinformationen
+              option.style(inputStyle);
+
+              // Informationstext
+              text(
+                description, // Text
+                optionsX + inputWidth + 5, // X-Position
+                optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding // Y-Position
+              );
+
+              // Counter erhöhen
+              optionCounter++;
+            break;
+            case "color":
+              // Color Picker positionieren
+              option.position(
+                windowOptionsX, // X-Position
+                windowOptionsY + (settingsOptionsHeight - colorPickerHeight)/2 + optionCounter*settingsOptionsHeight // Y-Position
+              );
+
+              // Erweiterte Styleinformationen
+              option.style(colorPickerStyle);
+
+              // Informationstext
+              text(
+                description, // Text
+                optionsX + colorPickerWidth + 5, // X-Position
+                optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding // Y-Position
+              );
+
+              // Counter erhöhen
+              optionCounter++;
+            break;
+          }
+        }
+
+        // Farben
+        addOption(colorMandelbrotmenge, "color", "Mandelbrotmenge");
+        addOption(color1, "color", "Farbe 1");
+        addOption(color2, "color", "Farbe 2");
+
+        // Grenzwert
+        addOption(grenzwert, "input", "Grenzwert");
+
+        // schwellenwert
+        addOption(schwellenwert, "input", "Schwellenwert");
 
         // Gaussches Koordinatensystem
-
-        // Grenze einstellen
-        grenzwert.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - inputHeight)/2 + optionCounter*settingsOptionsHeight); // Input positionieren
-        grenzwert.style(inputStyle);
-        text("Grenzwert", optionsX + inputWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
-        optionCounter++; // Counter erhöhen
-
-        // Schwellenwert einstellen
-        schwellenwert.position(windowOptionsX, windowOptionsY + (settingsOptionsHeight - inputHeight)/2 + optionCounter*settingsOptionsHeight); // Input positionieren
-        schwellenwert.style(inputStyle);
-        text("Schwellenwert", optionsX + inputWidth + 5, optionsY + optionCounter*settingsOptionsHeight + settingsOptionsPadding); // Informationstext
-        optionCounter++; // Counter erhöhen
+        addOption(reMinI, "input", "Realteil Minimum");
+        addOption(reMaxI, "input", "Realteil Maximum");
+        addOption(imMaxI, "input", "Imaginärteil Maximum");
+        addOption(imMinI, "input", "Imaginärteil Minimum");
 
         // Inputs anzeigen
-        color1.show();
-        color2.show();
-        colorMandelbrotmenge.show();
-        grenzwert.show();
-        schwellenwert.show();
+        [color1, color2, colorMandelbrotmenge, grenzwert, schwellenwert, reMinI, reMaxI, imMinI, imMaxI].forEach(option => option.show());
       } else {
         // Alle inputs verstecken
-        color1.hide();
-        color2.hide();
-        colorMandelbrotmenge.hide();
-        grenzwert.hide();
-        schwellenwert.hide();
+        [color1, color2, colorMandelbrotmenge, grenzwert, schwellenwert, reMinI, reMaxI, imMinI, imMaxI].forEach(option => option.hide());
       }
 
-      // Button Einstellungen
-      fill("black");
-      strokeWeight(0);
-      rect(settingsBoxX, settingsBoxY, settingsBoxSize, settingsBoxSize, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius, settingsBoxRadius);
-      fill("white");
-      textSize(settingsBoxSize*2/3);
-      textAlign(CENTER, CENTER);
-      text("⚙️", settingsBoxX, settingsBoxY, settingsBoxSize, settingsBoxSize); // Text für zoom out
+      // Funktion um einen Button anzuzeigen
+      function createButton(content, fontSize, x, y, l, h, r = 0) {
+        fill("black");
+        strokeWeight(0);
+        rect(x, y, h, l, r, r, r, r);
+        fill("white");
+        textSize(fontSize);
+        textAlign(CENTER, CENTER);
+        text(content, x, y, h, l); // Text für Einstellungen
+      }
 
-
-      // Zoom Button anzeigen
-      fill("black");
-      strokeWeight(0);
-      rect(zoomOutX, zoomOutY, zoomBoxSize, zoomBoxSize); // Zoom out Button
-      strokeWeight(0);
-      rect(zoomInX, zoomInY, zoomBoxSize, zoomBoxSize); // Zoom in Button
-
-      fill("white");
-      textSize(zoomBoxSize);
-      textAlign(CENTER, CENTER);
-      text("-", zoomOutX, zoomOutY, zoomBoxSize, zoomBoxSize); // Text für zoom out
-      textSize(zoomBoxSize);
-      textAlign(CENTER, CENTER);
-      text("+", zoomInX, zoomInY, zoomBoxSize, zoomBoxSize); // Text für zoom in
+      // Buttons
+      createButton("⚙️", settingsBoxSize*2/3, settingsBoxX, settingsBoxY, settingsBoxSize, settingsBoxSize, settingsBoxRadius); // Einstellungen
+      createButton("-", zoomBoxSize, zoomOutX, zoomOutY, zoomBoxSize, zoomBoxSize); // Zoom out
+      createButton("+", zoomBoxSize, zoomInX, zoomInY, zoomBoxSize, zoomBoxSize); // Zoom in
+      createButton("📸", saveBoxSize*2/3, saveBoxX, saveBoxY, saveBoxSize, saveBoxSize, saveBoxRadius); // Screenshot
 
       if (mouseIsPressed == true && buttonPressed() === false) {
         // Eigene Auswahl treffen
@@ -408,10 +445,10 @@
           let reLength = reMax - reMin; // Länge vom realteil berechnen
           let imLength = imMax - imMin; // Länge vom imaginärteil berechnen
 
-          reMin += Math.min(customZoomXStart, customZoomXEnd)/width*reLength; // Neues Minimum berechnen [Zoom]
-          reMax -= (width - Math.max(customZoomXStart, customZoomXEnd))/width*reLength; // Neues Maximum berechnen [Zoom]
-          imMin += (height - Math.max(customZoomYStart, customZoomYEnd))/height*imLength; // Neues Minimum berechnen [Zoom]
-          imMax -= Math.min(customZoomYStart, customZoomYEnd)/height*imLength; // Neues Maximum berechnen [Zoom]
+          reMinI.value(reMin + Math.min(customZoomXStart, customZoomXEnd)/width*reLength); // Neues Minimum berechnen [Zoom]
+          reMaxI.value(reMax - (width - Math.max(customZoomXStart, customZoomXEnd))/width*reLength); // Neues Maximum berechnen [Zoom]
+          imMinI.value(imMin + (height - Math.max(customZoomYStart, customZoomYEnd))/height*imLength); // Neues Minimum berechnen [Zoom]
+          imMaxI.value(imMax - Math.min(customZoomYStart, customZoomYEnd)/height*imLength); // Neues Maximum berechnen [Zoom]
 
           // Reset Variablen
           customZoomXStart = 0;
@@ -461,6 +498,8 @@
       } else if(buttonPressed("settingsBox")) {
         settingsWindow = !settingsWindow;
         redraw(); // Neu laden
+      } else if(buttonPressed("saveBox")) {
+        saveCanvas('mandelbrot', 'png');
       }
     }
 
@@ -474,23 +513,23 @@
       switch(keyCode) {
         case LEFT_ARROW:
           // Mandelbrot nach links verschieben
-          reMin -= reLength*0.1;
-          reMax -= reLength*0.1;
+          reMinI.value(reMin - reLength*0.1);
+          reMaxI.value(reMax - reLength*0.1);
         break;
         case RIGHT_ARROW:
           // Mandelbrot nach rechts verschieben
-          reMin += reLength*0.1;
-          reMax += reLength*0.1;
+          reMinI.value(reMin + reLength*0.1);
+          reMaxI.value(reMax + reLength*0.1);
         break;
         case UP_ARROW:
           // Mandelbrot nach oben verschieben
-          imMin += imLength*0.1;
-          imMax += imLength*0.1;
+          imMinI.value(imMin + imLength*0.1);
+          imMaxI.value(imMax + imLength*0.1);
         break;
         case DOWN_ARROW:
-          // mandelbrot nach unten verschieben
-          imMin -= imLength*0.1;
-          imMax -= imLength*0.1;
+          // Mandelbrot nach unten verschieben
+          imMinI.value(imMin - imLength*0.1);
+          imMaxI.value(imMax - imLength*0.1);
         break;
       }
     }
@@ -576,16 +615,16 @@
       }
 
       // Ersetze die Werte der aktuellen Koordinatenachsen
-      reMin *= mult; // Realteil Minimum
-      reMax *= mult; // Realteil Maximum
-      imMin *= mult; // Imaginärteil Minimum
-      imMax *= mult; // Imaginärteil Maximum
+      reMinI.value(reMin * mult); // Realteil Minimum
+      reMaxI.value(reMax * mult); // Realteil Maximum
+      imMinI.value(imMin * mult); // Imaginärteil Minimum
+      imMaxI.value(imMax * mult); // Imaginärteil Maximum
 
       redraw(); // Grafik neu laden
     }
 
     // Generiert eine zufällige Farbe im HEX system
-    function randomColor() { // Farbe generieren
+    function randomColor() { 
       let hexPart = function() {return round(random(0, 255)).toString(16)}; // Hexteil für jeweils r,g,b generieren
       return "#" + hexPart() + hexPart() + hexPart(); // Farbe zusammensetzen (Standardfarben: #e90660, #1d9197)
     }
