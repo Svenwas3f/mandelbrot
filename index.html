@@ -461,28 +461,22 @@
 
     // Mouswheelfunction von p5js
     function mouseWheel(e) {
+      // Die Länge muss zwingend vor dem Anpassen ausgerechnet werden, da die Koordinatenvariablen anschliessend angepasst werden
+      let reLength = Math.abs(reMax - reMin); // Länge vom realteil berechnen
+      let imLength = Math.abs(imMax - imMin); // Länge vom imaginärteil berechnen
+      let reCenter = reMin + mouseX/width*reLength; // Neuer Mittelpunkt auf der Canvas vom realteil berechnen
+      let imCenter = imMax - mouseY/height*imLength; // Neuer Mittelpunkt auf der Canvas von imaginärteil berechnen
+
       if(e.delta < 0) { // e.delta kann positiv oder negativ sein.
-        // Die Länge muss zwingend vor dem Anpassen ausgerechnet werden, da die Koordinatenvariablen anschliessend angepasst werden
-        let reLength = Math.abs(reMax - reMin); // Länge vom realteil berechnen
-        let imLength = Math.abs(imMax - imMin); // Länge vom imaginärteil berechnen
-        let reCenter = reMin + mouseX/width*reLength; // Neuer Mittelpunkt auf der Canvas vom realteil berechnen
-        let imCenter = imMax - mouseY/height*imLength; // Neuer Mittelpunkt auf der Canvas von imaginärteil berechnen
-
-        reMin = (reCenter - reLength/2)*0.9; // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
-        reMax = (reCenter + reLength/2)*0.9; // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
-        imMin = (imCenter - imLength/2)*0.9; // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
-        imMax = (imCenter + imLength/2)*0.9; // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
+        reMinI.value((reCenter - reLength/2)*0.9); // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
+        reMaxI.value((reCenter + reLength/2)*0.9); // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
+        imMinI.value((imCenter - imLength/2)*0.9); // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
+        imMaxI.value((imCenter + imLength/2)*0.9); // Neue Achsenabschnitte definieren und multiplizieren um hinein zu zoomen
       }else {
-        // Die Länge muss zwingend vor dem Anpassen ausgerechnet werden, da die Koordinatenvariablen anschliessend angepasst werden
-        let reLength = Math.abs(reMax - reMin); // Länge vom realteil berechnen
-        let imLength = Math.abs(imMax - imMin); // Länge vom imaginärteil berechnen
-        let reCenter = reMin + mouseX/width*reLength; // Neuer Mittelpunkt auf der Canvas vom realteil berechnen
-        let imCenter = imMax - mouseY/height*imLength; // Neuer Mittelpunkt auf der Canvas von imaginärteil berechnen
-
-        reMin = (reCenter - reLength/2)*1.1; // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
-        reMax = (reCenter + reLength/2)*1.1; // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
-        imMin = (imCenter - imLength/2)*1.1; // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
-        imMax = (imCenter + imLength/2)*1.1; // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
+        reMinI.value((reCenter - reLength/2)*1.1); // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
+        reMaxI.value((reCenter + reLength/2)*1.1); // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
+        imMinI.value((imCenter - imLength/2)*1.1); // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
+        imMaxI.value((imCenter + imLength/2)*1.1); // Neue Achsenabschnitte definieren und multiplizieren um hinaus zu zoomen
       }
 
       redraw(); // Grafik neu laden
@@ -624,7 +618,7 @@
     }
 
     // Generiert eine zufällige Farbe im HEX system
-    function randomColor() { 
+    function randomColor() {
       let hexPart = function() {return round(random(0, 255)).toString(16)}; // Hexteil für jeweils r,g,b generieren
       return "#" + hexPart() + hexPart() + hexPart(); // Farbe zusammensetzen (Standardfarben: #e90660, #1d9197)
     }
